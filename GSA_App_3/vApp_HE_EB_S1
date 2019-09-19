@@ -6,8 +6,7 @@ SELECT     HE.All_UID, HE.UID, HE.Batch_No, HE.Reporting_Period, HE.Corp_ID, HE.
                   CASE WHEN HE.corp_id = 53 THEN EB_adhoc.SCA_Ind_Setting WHEN HE.corp_id = 62 THEN EB_adhoc.SCA_Avg_Setting WHEN HE.corp_id = 63 THEN EB_adhoc.CBA_Passthru_Setting WHEN HE.corp_id = 95 THEN EB_adhoc.CBA_Avg_Setting ELSE 'N/A' END AS Setting_EB_Adhoc, 
                   COALESCE ((CASE WHEN Rate.EO_13706 IN ('yes') THEN EB_EO.Setting_EB_EO ELSE NULL END), (CASE WHEN HE.corp_id = 53 THEN COALESCE (EB.SCA_Ind_Setting, 'NO') WHEN HE.corp_id = 62 THEN COALESCE (EB.SCA_Avg_Setting, 'NO') 
                   WHEN HE.corp_id = 63 THEN COALESCE (EB.CBA_Passthru_Setting, 'NO') WHEN HE.corp_id = 95 THEN COALESCE (EB_adhoc.CBA_Avg_Setting, EB.CBA_Avg_Setting, 'NO') ELSE 'N/A' END)) AS Setting_EB, CASE WHEN HE.corp_id = 53 THEN isnull(HW.SCA_Ind_Setting, 'N/A') 
-                  ELSE 'N/A' END AS Capping, COALESCE (Rate.HW_Rate, 0) AS F_Rate_App, HE.Capping_YM, HE.No_PPED, HE.Hours, HE.EB_Adj_1 AS EB_Amt_1, HE.EB_Adj_2 AS EB_Amt_2, Rate.Contract_Type + N' ' + Rate.HW_Methodology AS Fringe_Type, Rate.WD_No, HE.Incl_YN, 
-                  HE.Exception_YN
+                  ELSE 'N/A' END AS Capping, COALESCE (Rate.HW_Rate, 0) AS F_Rate_App, HE.Hours, HE.EB_Adj_1 AS EB_Amt_1, HE.EB_Adj_2 AS EB_Amt_2, Rate.Contract_Type + N' ' + Rate.HW_Methodology AS Fringe_Type, Rate.WD_No, HE.Incl_YN, HE.Exception_YN
 FROM        dbo.vNorm_Src_HE AS HE LEFT OUTER JOIN
                       (SELECT     Corp_ID, Contract, Type, Subtype_1, Code, CodeDesc, Action, Criteria_1, Criteria_2, From_Date, To_Date, SCA_Avg_Setting, SCA_Ind_Setting, CBA_Avg_Setting, CBA_Passthru_Setting, Status
                        FROM        dbo.vRef_App_Business_Rule AS vRef_App_Business_Rule_3
