@@ -1,0 +1,15 @@
+SELECT     A.All_UID_Max, A.Reporting_Period, A.Corp_ID, A.Dept_code, A.Loc_desc, A.Contract_ID, A.Contract_Name, A.Contract_type, A.Compl_Level, A.EE_SSN, A.EE_No, A.EE_ID, A.First_name, A.Last_name, A.Full_name, A.EE_First_DM, A.EE_Term_Date, A.Corp_Open_Month, A.Pay_Period_End, 
+                  A.Earnings_Code, A.Setting_HW, A.Setting_EB, A.F_Rate_App, A.Total_Hours, CASE WHEN Setting_HW IN ('Yes') THEN (Total_Hours) ELSE 0 END AS Hours_HW_Due_Yes, CASE WHEN Setting_HW IN ('Yes') THEN (Total_Hours - COALESCE (Capping.Hours_Capped, 0)) 
+                  ELSE 0 END AS Recognized_Fringe_Hours, COALESCE (Capping.Hours_Capped, 0) AS Capped_Hours, CASE WHEN Setting_HW IN ('No') THEN Total_Hours ELSE 0 END AS HW_Due_No_Hours, CASE WHEN Setting_HW IS NULL OR
+                  Setting_HW NOT IN ('Yes', 'No') THEN Total_Hours ELSE 0 END AS HW_Exception, CASE WHEN A.Corp_Id IN (53, 62, 95) THEN ROUND(A.F_Rate_App * (CASE WHEN Setting_HW IN ('Yes') THEN (Total_Hours - COALESCE (Capping.Hours_Capped, 0)) ELSE 0 END), 2) 
+                  ELSE 0 END AS ER_contribution, A.Total_EB, CASE WHEN Setting_EB IN ('Yes') THEN Total_EB ELSE 0 END AS EB_Incl, CASE WHEN Setting_EB IN ('No') THEN Total_EB ELSE 0 END AS EB_Excl, CASE WHEN Setting_EB IS NULL OR
+                  Setting_EB NOT IN ('Yes', 'No') THEN Total_EB ELSE 0 END AS EB_Exception, 'HE LL' AS Proc_Level_HE, 'EB LL' AS Proc_Level_EB, CASE WHEN Setting_HW IN ('Yes', 'No') THEN 'Fringe' ELSE 'Exception' END AS HW_Label, CASE WHEN Setting_HW IN ('Yes') 
+                  THEN 'Fringe HW' WHEN Setting_HW IN ('No') THEN 'Fringe HW Excl ' ELSE 'HW Exception' END AS HW_Proc_Label, CASE WHEN Setting_EB IN ('Yes', 'No') THEN 'EB' ELSE 'Exception' END AS EB_Label, CASE WHEN Setting_EB IN ('Yes') THEN 'EB Incl' WHEN Setting_HW IN ('No') 
+                  THEN 'EB Excl ' ELSE 'EB Exception' END AS EB_Proc_Label, A.Pay_Date, A.Capping, A.Capping_YM, A.No_PPED, A.Fringe_Type, A.WD_No
+FROM        (SELECT     MAX(All_UID) AS All_UID_Max, Reporting_Period, Corp_ID, Loc_desc, Dept_code, Contract_Name, Contract_type, Compl_Level, EE_SSN, EE_No, EE_ID, First_name, Last_name, Full_name, EE_First_DM, EE_Term_Date, Corp_Open_Month, Pay_Period_End, Pay_Date, 
+                                     Earnings_Code, Capping, Capping_YM, No_PPED, SUM(Hours) AS Total_Hours, SUM(EB_Amt_1) AS Total_EB, Setting_HW, Setting_EB, Contract_ID, Contract_Name AS Expr1, F_Rate_App, Fringe_Type, WD_No
+                   FROM        dbo.vApp_HE_EB_S1
+                   GROUP BY Reporting_Period, Corp_ID, Contract_Name, Contract_type, Compl_Level, EE_SSN, EE_No, EE_ID, First_name, Last_name, Full_name, EE_First_DM, EE_Term_Date, Corp_Open_Month, Pay_Period_End, Pay_Date, Setting_EB, Setting_HW, Earnings_Code, F_Rate_App, 
+                                     Dept_code, Loc_desc, Contract_ID, Contract_Name, Fringe_Type, WD_No, Capping_YM, No_PPED, Capping) AS A LEFT OUTER JOIN
+                      (SELECT     All_UID_Max, Corp_ID, EE_SSN, Capping, Cap, Hours_Capped
+                       FROM        dbo.vApp_HE_EB_S1_Capping) AS Capping ON A.All_UID_Max = Capping.All_UID_Max
