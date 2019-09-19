@@ -1,5 +1,5 @@
 SELECT     HE.All_UID, HE.UID, HE.Batch_No, HE.Reporting_Period, HE.Corp_ID, HE.Contract_ID, HE.Contract_Name, HE.Contract_type, HE.Compl_Level, HE.Dept_code, HE.Loc_desc, HE.EE_SSN, HE.EE_No, HE.EE_ID, HE.First_name, HE.Last_name, HE.Full_name, HE.EE_First_DM, 
-                  HE.EE_Term_Date, HE.Corp_Open_Month, HE.Pay_Period_Start, HE.Pay_Period_End, HE.Pay_Date, HE.Earnings_Code, CASE WHEN HE.corp_id = 53 THEN COALESCE (HW.SCA_Ind_Setting, 'NO') WHEN HE.corp_id = 62 THEN COALESCE (HW.SCA_Avg_Setting, 'NO') 
+                  HE.EE_Term_Date, HE.Corp_Open_Month, HE.Pay_Period_Start, HE.Pay_Period_End, HE.PPED, HE.Pay_Date, HE.Earnings_Code, CASE WHEN HE.corp_id = 53 THEN COALESCE (HW.SCA_Ind_Setting, 'NO') WHEN HE.corp_id = 62 THEN COALESCE (HW.SCA_Avg_Setting, 'NO') 
                   WHEN HE.corp_id = 63 THEN COALESCE (HW.CBA_Passthru_Setting, 'NO') WHEN HE.corp_id = 95 THEN COALESCE (HW.CBA_Avg_Setting, 'NO') ELSE 'N/A' END AS Setting_HW, CASE WHEN HE.corp_id = 53 THEN COALESCE (EB.SCA_Ind_Setting, 'NO') 
                   WHEN HE.corp_id = 62 THEN COALESCE (EB.SCA_Avg_Setting, 'NO') WHEN HE.corp_id = 63 THEN COALESCE (EB.CBA_Passthru_Setting, 'NO') WHEN HE.corp_id = 95 THEN COALESCE (EB.CBA_Avg_Setting, 'NO') ELSE 'N/A' END AS Setting_EB_1, CASE WHEN Rate.EO_13706 IN ('yes') 
                   THEN EB_EO.Setting_EB_EO ELSE NULL END AS Setting_EB_EO, 
@@ -21,4 +21,4 @@ FROM        dbo.vNorm_Src_HE AS HE LEFT OUTER JOIN
                        FROM        dbo.vRef_App_Business_Rule AS vRef_App_Business_Rule_1
                        WHERE     (Type IN (N'Hours and Earnings')) AND (Criteria_1 IN (N'HW due'))) AS HW ON HE.Earnings_Code = HW.Code LEFT OUTER JOIN
                       (SELECT     Corp_ID, Dept_code, Loc_desc, HW_Rate, Contract_ID, Contract_Name, Contract_Type, HW_Methodology, EO_13706, WD_Start_Date, WD_Renewal_Date, [WD_ Modification_Date], WD_No
-                       FROM        dbo.vRef_App_Contract) AS Rate ON HE.Dept_code = Rate.Dept_code AND HE.Loc_desc = Rate.Loc_desc
+                       FROM        dbo.vRef_App_Contract) AS Rate ON HE.Dept_code = Rate.Dept_code AND HE.Loc_desc = Rate
