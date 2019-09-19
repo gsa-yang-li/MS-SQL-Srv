@@ -1,15 +1,17 @@
 SELECT     HE.All_UID, HE.UID, HE.Batch_No, HE.Reporting_Period, HE.Corp_ID, HE.Org_1_Dept AS Dept_code, HE.Loc_Desc_1 AS Loc_desc, HE.Project_ID, HE.Payroll_Company, FDM.ContractID AS Contract_ID, FDM.ContractName AS Contract_Name, LTRIM(RIGHT(FDM.Corp_Name, 
                   LEN(FDM.Corp_Name) - CHARINDEX('-', FDM.Corp_Name) - 1)) AS Contract_type, FDM.ComplianceLevel AS Compl_Level, HE.EE_SSN, HE.EE_No, FDM.EE_ID, FDM.First_name, FDM.Last_name, FDM.Full_name, FDM.MaxOfMonth AS EE_First_DM, 
-                  FDM.MaxOfTerminationDate AS EE_Term_Date, FDM.Corp_Open_Month, HE.Loc_Desc_2, HE.Pay_Period_Start, HE.Pay_Period_End, HE.Pay_Date, HE.Pay_Rate, HE.Contract_1, HE.Contract_2, HE.Earnings_Code, HE.Capping_YM, DTHL.No_PPED, HE.ECode_Desc, HE.Hours, 
+                  FDM.MaxOfTerminationDate AS EE_Term_Date, FDM.Corp_Open_Month, HE.Loc_Desc_2, HE.Pay_Period_Start, HE.Pay_Period_End, DTHL.PPED, DTHL.Capping_Hrs, HE.Pay_Date, HE.Pay_Rate, HE.Contract_1, HE.Contract_2, HE.Earnings_Code, HE.ECode_Desc, HE.Hours, 
                   CASE WHEN EB_Amt_1 IS NOT NULL THEN EB_Amt_1 * - 1 ELSE 0 END AS EB_Adj_1, CASE WHEN EB_Amt_2 IS NOT NULL THEN EB_Amt_1 * - 1 ELSE 0 END AS EB_Adj_2, HE.Gross_Pay, HE.Fringe_Rate AS F_Rate_Src, HE.Benefit_Code_1, HE.Benefit_Code_2, HE.Fringe_Schedule_1, 
                   HE.Fringe_Schedule_2, HE.Status, HE.UPD_UID, CASE WHEN hours = 0 AND EB_Amt_1 = 0 AND EB_Amt_2 = 0 THEN 'N' WHEN hours IS NULL AND EB_Amt_1 IS NULL AND EB_Amt_2 IS NULL THEN 'N' ELSE 'Y' END AS Incl_YN, CASE WHEN HE.Corp_id IS NULL 
                   THEN 'Y' ELSE 'N' END AS Exception_YN
 FROM        dbo.vITF_102_Src_HoursEarning AS HE INNER JOIN
                       (SELECT     MAX(Reporting_Period) AS Max_Reporting_Period
                        FROM        dbo.vRef_BSS_Corp_Open_Month) AS RM ON HE.Reporting_Period = RM.Max_Reporting_Period LEFT OUTER JOIN
-                  dbo.vRef_BSS_Corp_EE_First_DM AS FDM ON HE.Corp_ID = FDM.Corp_ID AND HE.EE_SSN = FDM.EE_SSN LEFT OUTER JOIN
-                      (SELECT     Year_month AS Capping_YM, MAX(Row_No) AS No_PPED
-                       FROM        dbo.vRef_App_Client_Date_HL
-                       GROUP BY Year_month) AS DTHL ON HE.Capping_YM = DTHL.Capping_YM
+                      (SELECT     P.Corp_ID, P.Cal_Date, P.PPED, P.Frequency, C.SCA_Ind_Setting AS Capping_Hrs
+                       FROM        dbo.vRef_App_Client_Date_PPED AS P LEFT OUTER JOIN
+                                             (SELECT     Corp_ID, SCA_Ind_Setting
+                                              FROM        dbo.vRef_App_Business_Rule
+                                              WHERE     (Criteria_1 IN ('Capping'))) AS C ON P.Corp_ID = C.Corp_ID) AS DTHL ON HE.Pay_Period_End = DTHL.Cal_Date LEFT OUTER JOIN
+                  dbo.vRef_BSS_Corp_EE_First_DM AS FDM ON HE.Corp_ID = FDM.Corp_ID AND HE.EE_SSN = FDM.EE_SSN
 WHERE     (HE.Status IS NULL OR
                   HE.Status IN (N'Actvie')) AND (CASE WHEN hours = 0 AND EB_Amt_1 = 0 AND EB_Amt_2 = 0 THEN 'N' WHEN hours IS NULL AND EB_Amt_1 IS NULL AND EB_Amt_2 IS NULL THEN 'N' ELSE 'Y' END IN ('Y'))
