@@ -21,4 +21,4 @@ FROM        dbo.vNorm_Src_HE AS HE LEFT OUTER JOIN
                        FROM        dbo.vRef_App_Business_Rule AS vRef_App_Business_Rule_1
                        WHERE     (Type IN (N'Hours and Earnings')) AND (Criteria_1 IN (N'HW due'))) AS HW ON HE.Earnings_Code = HW.Code LEFT OUTER JOIN
                       (SELECT     Corp_ID, Dept_code, Loc_desc, HW_Rate, Contract_ID, Contract_Name, Contract_Type, HW_Methodology, EO_13706, WD_Start_Date, WD_Renewal_Date, [WD_ Modification_Date], WD_No
-                       FROM        dbo.vRef_App_Contract) AS Rate ON HE.Dept_code = Rate.Dept_code AND HE.Loc_desc = Rate
+                       FROM        dbo.vRef_App_Contract) AS Rate ON HE.Dept_code = Rate.Dept_code AND HE.Loc_desc = Rate.Loc_desc
