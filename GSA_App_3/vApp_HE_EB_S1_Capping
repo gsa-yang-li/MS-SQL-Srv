@@ -1,0 +1,13 @@
+SELECT     MAX(All_UID) AS All_UID_Max, Corp_ID, EE_SSN, PPED, Capping, SUM(Hours) AS Hours_total, Cap, CASE WHEN SUM(HE_ONLY.Hours) > cap THEN round(SUM(HE_ONLY.Hours) - cap, 2) ELSE 0 END AS Hours_Capped
+FROM        (SELECT     HE.All_UID, HE.UID, HE.Batch_No, HE.Reporting_Period, HE.Corp_ID, HE.Dept_code, HE.Loc_desc, HE.EE_SSN, HE.EE_No, HE.EE_ID, HE.First_name, HE.Last_name, HE.Full_name, HE.EE_First_DM, HE.EE_Term_Date, HE.Corp_Open_Month, HE.Pay_Period_Start, 
+                                     HE.Pay_Period_End, HE.PPED, HE.Pay_Date, HE.Earnings_Code, HE.Hours, CASE WHEN HE.corp_id = 53 THEN isnull(HW.SCA_Ind_Setting, 'N/A') ELSE 'N/A' END AS Capping, HE.Incl_YN, HE.Exception_YN, COALESCE (Capping.SCA_Ind_Setting, N'0') AS Cap
+                   FROM        (SELECT     Corp_ID, Type, Subtype_1, Code, CodeDesc, Action, Criteria_1, Criteria_2, From_Date, To_Date, SCA_Avg_Setting, SCA_Ind_Setting, CBA_Avg_Setting, CBA_Passthru_Setting, Status
+                                      FROM        dbo.vRef_App_Business_Rule AS vRef_App_Business_Rule_1
+                                      WHERE     (Type IN (N'Hours and Earnings')) AND (Criteria_1 IN (N'capping'))) AS Capping RIGHT OUTER JOIN
+                                         (SELECT     Corp_ID, Type, Subtype_1, Code, CodeDesc, Action, Criteria_1, Criteria_2, From_Date, To_Date, SCA_Avg_Setting, SCA_Ind_Setting, CBA_Avg_Setting, CBA_Passthru_Setting, Status
+                                          FROM        dbo.vRef_App_Business_Rule AS vRef_App_Business_Rule_1
+                                          WHERE     (Type IN (N'Hours and Earnings')) AND (Criteria_1 IN (N'HW due'))) AS HW ON Capping.Corp_ID = HW.Corp_ID RIGHT OUTER JOIN
+                                     dbo.vNorm_Src_HE AS HE ON HW.Code = HE.Earnings_Code
+                   WHERE     (HE.Exception_YN IN ('N')) AND (HE.Corp_ID = 53)) AS HE_Only
+GROUP BY Corp_ID, EE_SSN, Capping, Cap, PPED
+HAVING     (Capping = 'Yes')
