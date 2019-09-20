@@ -1,0 +1,10 @@
+SELECT     CorporationID, CorporationName, TaxID, MonthlyOffsetForSourceOfHours, ContractName, ContractID, LocationDescription, EmployeeID, ContractLocationID, Salutation, FirstName, MiddleName, LastName, SSN, Gender, MaritalStatus, SpouseName, HourBankThreshold, SpouseSSN, Title, 
+                  Email, WorkEmail, ChildrenNumber, BirthDate, SpouseBirthDate, EmployeeNumber, Suffix, TerminationReason, ScheduledWorkHours, PayFrequency, DateHired, AdminDate, AdjustedServiceDate, TerminationDate, TerminationDateStamp, TerminationCode, HourlyWage, EarningsAmount, 
+                  EarningsClass, HireStatus, SubscribeToAdminFee, AddressID, Address1, Address2, City, State, Zip, HomePhone, CellPhone, Country, UserDefinedField01_Label, UserDefinedField02_Label, UserDefinedField03_Label, UserDefinedField04_Label, UserDefinedField05_Label, 
+                  UserDefinedField06_Label, UserDefinedField01 AS UDF1_empl_status, UserDefinedField02 AS UDF2_SCA_code, UserDefinedField03 AS UDF3_class_3, UserDefinedField04 AS UDF4_rehire, UserDefinedField05 AS UDF5_transfer, UserDefinedField06 AS UDF6_POC, 
+                  CASE WHEN [EE].[terminationdate] IS NULL OR
+                  ([EE].[terminationdate] IS NOT NULL AND isnull([EE].[AdjustedServiceDate], CONVERT(datetime, '1900-01-01')) > [EE].[terminationdate] AND isnull([EE].[AdjustedServiceDate], CONVERT(datetime, '1900-01-01')) >= isnull([EE].[Datehired], CONVERT(datetime, '1900-01-01'))) OR
+                  ([EE].[terminationdate] IS NOT NULL AND isnull([EE].[Datehired], CONVERT(datetime, '1900-01-01')) > [EE].[terminationdate] AND isnull([EE].[Datehired], CONVERT(datetime, '1900-01-01')) >= isnull([EE].[AdjustedServiceDate], CONVERT(datetime, '1900-01-01'))) 
+                  THEN 'Active' ELSE 'Inactive' END AS Empl_status
+FROM        dbo.EmployeeDemographicData AS EE
+WHERE     (CorporationID IN (82))
